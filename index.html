@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House Price Prediction</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-4 text-center">House Price Prediction</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <div>
+                <img src="/static/feature_importance.png" alt="Feature Importance" class="w-full h-auto">
+            </div>
+            <div>
+                <img src="/static/actual_vs_predicted.png" alt="Actual vs Predicted" class="w-full h-auto">
+            </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded shadow-md">
+            <h2 class="text-xl font-semibold mb-4">Enter House Details</h2>
+            <form id="predictionForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium">Median Income</label>
+                    <input type="number" step="any" name="MedInc" required class="w-full p-2 border rounded" min="0">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">House Age</label>
+                    <input type="number" step="any" name="HouseAge" required class="w-full p-2 border rounded" min="0">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Average Rooms</label>
+                    <input type="number" step="any" name="AveRooms" required class="w-full p-2 border rounded" min="0">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Average Bedrooms</label>
+                    <input type="number" step="any" name="AveBedrms" required class="w-full p-2 border rounded" min="0">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Population</label>
+                    <input type="number" step="any" name="Population" required class="w-full p-2 border rounded" min="0">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Average Occupancy</label>
+                    <input type="number" step="any" name="AveOccup" required class="w-full p-2 border rounded" min="0">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Latitude</label>
+                    <input type="number" step="any" name="Latitude" required class="w-full p-2 border rounded" min="32" max="42">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Longitude</label>
+                    <input type="number" step="any" name="Longitude" required class="w-full p-2 border rounded" min="-124" max="-114">
+                </div>
+                <div class="md:col-span-2">
+                    <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">Predict</button>
+                </div>
+            </form>
+            <div id="result" class="mt-4 text-center"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                if (result.error) {
+                    document.getElementById('result').innerHTML = `<p class="text-red-500">${result.error}</p>`;
+                } else {
+                    document.getElementById('result').innerHTML = `<p class="text-green-500">Predicted House Price: $${(result.prediction * 100000).toFixed(2)}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('result').innerHTML = `<p class="text-red-500">Error: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
